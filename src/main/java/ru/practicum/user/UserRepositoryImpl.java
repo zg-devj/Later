@@ -12,7 +12,7 @@ import java.util.Map;
 @Repository
 public class UserRepositoryImpl implements UserRepository {
     private final Map<Long, User> users = new HashMap<>();
-    private Long userId = 0L;
+    private static Long userId = 0L;
 
     @Override
     public List<User> findAll() {
@@ -21,12 +21,11 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User save(User user) {
-        user.setId(++userId);
         if (!users.containsKey(user.getId())) {
+            user.setId(++userId);
             users.put(user.getId(), user);
             return user;
         }
-        --userId;
         return null;
     }
 }
