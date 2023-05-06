@@ -2,16 +2,17 @@ package ru.practicum.item;
 
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 @Data
 @Entity
 @Table(name = "items", schema = "public")
 public class Item {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "user_id")
@@ -19,4 +20,22 @@ public class Item {
 
     @Column
     private String url;
+
+    @ElementCollection
+    @CollectionTable(name = "tags", joinColumns = @JoinColumn(name = "item_id"))
+    @Column(name = "name")
+    private Set<String> tags = new HashSet<>();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Item item = (Item) o;
+        return Objects.equals(id, item.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }
