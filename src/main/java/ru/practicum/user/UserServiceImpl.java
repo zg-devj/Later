@@ -28,6 +28,11 @@ public class UserServiceImpl implements UserService {
         return UserMapper.toUserDto(user);
     }
 
+    @Override
+    public List<UserShort> getShortUsers(String emailSearch) {
+        return repository.findAllByEmailContainingIgnoreCase(emailSearch);
+    }
+
     public void checkUsers() {
         // сначала создаём описание сортировки по полю id
         Sort sortById = Sort.by(Sort.Direction.ASC, "id");

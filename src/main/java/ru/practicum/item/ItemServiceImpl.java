@@ -4,6 +4,8 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.user.User;
+import ru.practicum.user.UserRepository;
 
 import java.util.List;
 import java.util.Set;
@@ -14,18 +16,20 @@ import java.util.Set;
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
+    private final UserRepository userRepository;
 
     @Override
     public List<ItemDto> getItems(long userId) {
         List<Item> items = itemRepository.findByUserId(userId);
-        List<ItemDto> itemDtos = ItemMapper.mapToItemDto(items);
-        return itemDtos;
+        return ItemMapper.mapToItemDto(items);
     }
 
     @Transactional
     @Override
     public ItemDto addNewItem(long userId, ItemDto itemDto) {
-        Item item = itemRepository.save(ItemMapper.mapToItem(itemDto, userId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Item item = itemRepository.save(ItemMapper.mapToItem(itemDto, user));
         return ItemMapper.mapToItemDto(item);
     }
 
@@ -37,9 +41,15 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> getItems(long userId, Set<String> tags) {
-        BooleanExpression byUserId = QItem.item.userId.eq(userId);
+        BooleanExpression byUserId = QItem.item.user.id.eq(userId);
         BooleanExpression byAnyTag = QItem.item.tags.any().in(tags);
         Iterable<Item> foundItems = itemRepository.findAll(byUserId.and(byAnyTag));
+        return ItemMapper.mapToItemDto(foundItems);
+    }
+
+    @Override
+    public List<ItemDto> getUserItems(String lastName) {
+        List<Item> foundItems = itemRepository.findItemsByLastNamePrefix(lastName);
         return ItemMapper.mapToItemDto(foundItems);
     }
 

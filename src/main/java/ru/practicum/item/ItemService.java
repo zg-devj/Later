@@ -14,5 +14,7 @@ public interface ItemService {
 
     List<ItemDto> getItems(long userId, Set<String> tags);
 
+    List<ItemDto> getUserItems(String lastName);
+
     List<ItemCountByUser> getItemCountByUser(String urlPart);
 }
