@@ -18,7 +18,7 @@ public class ItemNote {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     // исключаем все поля с отложенной загрузкой из
     // метода toString, чтобы не было случайных обращений
     // базе данных, например при выводе в лог.
