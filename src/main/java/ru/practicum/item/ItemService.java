@@ -1,11 +1,18 @@
 package ru.practicum.item;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
+import java.util.Set;
 
 public interface ItemService {
-    List<Item> getItems(Long userId);
+    List<ItemDto> getItems(long userId);
 
-    Item addNewItem(Long userId, Item item);
+    ItemDto addNewItem(long userId, ItemDto itemDto);
 
-    void deleteItem(Long userId, long itemId);
+    void deleteItem(long userId, long itemId);
+
+    List<ItemDto> getItems(long userId, Set<String> tags);
+
+    List<ItemCountByUser> getItemCountByUser(String urlPart);
 }

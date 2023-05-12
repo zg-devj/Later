@@ -14,13 +14,11 @@ public class UserController {
 
     @GetMapping
     public List<UserDto> getAllUsers() {
-        List<User> users = userService.getAllUsers();
-        return UserMapper.toUserDto(users);
+        return userService.getAllUsers();
     }
 
     @PostMapping
     public UserDto saveNewUser(@RequestBody UserDto userDto) {
-        User user = UserMapper.toUser(userDto);
-        return UserMapper.toUserDto(userService.saveUser(user));
+        return userService.saveUser(userDto);
     }
 }
