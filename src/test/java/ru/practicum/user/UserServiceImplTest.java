@@ -2,10 +2,8 @@ package ru.practicum.user;
 
 import lombok.RequiredArgsConstructor;
 import org.assertj.core.api.Assertions;
-import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +11,6 @@ import ru.practicum.config.PersistenceConfig;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -49,6 +46,36 @@ class UserServiceImplTest {
 
         Assertions.assertThat(users)
                 .filteredOn("state", UserState.ACTIVE);
+    }
+
+    @Test
+    void getAllUsers_em() {
+        // given
+        List<UserDto> sourceUsers = List.of(
+                makeUserDto("ivan@email", "Ivan", "Ivanov"),
+                makeUserDto("petr@email", "Petr", "Petrov"),
+                makeUserDto("vasilii@email", "Vasilii", "Vasiliev")
+        );
+
+        for (UserDto user : sourceUsers) {
+            User entity = UserMapper.toUser(user);
+            em.persist(entity);
+        }
+        em.flush();
+
+        // when
+        List<UserDto> targetUsers = service.getAllUsers();
+
+        // then
+        assertThat(targetUsers, hasSize(sourceUsers.size()));
+        for (UserDto sourceUser : sourceUsers) {
+            assertThat(targetUsers, hasItem( allOf(
+                    hasProperty("id", notNullValue()),
+                    hasProperty("firstName", equalTo(sourceUser.getFirstName())),
+                    hasProperty("lastName", equalTo(sourceUser.getLastName())),
+                    hasProperty("email", equalTo(sourceUser.getEmail()))
+            )));
+        }
     }
 
     //@Rollback(value = false)
