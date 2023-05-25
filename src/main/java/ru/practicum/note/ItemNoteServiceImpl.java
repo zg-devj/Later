@@ -3,28 +3,34 @@ package ru.practicum.note;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import ru.practicum.item.Item;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.common.InsufficientPermissionException;
 import ru.practicum.item.ItemRepository;
+import ru.practicum.item.model.Item;
 
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ItemNoteServiceImpl implements ItemNoteService {
+
     private final ItemNoteRepository itemNoteRepository;
+
     private final ItemRepository itemRepository;
 
     @Override
+    @Transactional
     public ItemNoteDto addNewItemNote(long userId, ItemNoteDto itemNoteDto) {
         Item item = itemRepository.findById(itemNoteDto.getItemId())
-                .orElseThrow(() -> new RuntimeException("Item not found"));
-        ItemNote itemNote = itemNoteRepository
-                .save(ItemNoteMapper.mapToItemNote(itemNoteDto, item));
+                .orElseThrow(() ->  new InsufficientPermissionException(
+                        "You do not have permission to perform this operation"));
+        ItemNote itemNote = itemNoteRepository.save(ItemNoteMapper.mapToItemNote(itemNoteDto, item));
         return ItemNoteMapper.mapToItemNoteDto(itemNote);
     }
 
     @Override
-    public List<ItemNoteDto> searchNotesByUrl(String url, long userId) {
+    public List<ItemNoteDto> searchNotesByUrl(String url, Long userId) {
         List<ItemNote> itemNotes = itemNoteRepository.findAllByItemUrlContainingAndItemUserId(url, userId);
         return ItemNoteMapper.mapToItemNoteDto(itemNotes);
     }

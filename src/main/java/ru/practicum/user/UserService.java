@@ -2,8 +2,7 @@ package ru.practicum.user;
 
 import java.util.List;
 
-public interface UserService {
+interface UserService {
     List<UserDto> getAllUsers();
     UserDto saveUser(UserDto userDto);
-    List<UserShort> getShortUsers(String emailSearch);
 }

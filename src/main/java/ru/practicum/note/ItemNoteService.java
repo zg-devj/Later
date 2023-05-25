@@ -1,11 +1,16 @@
 package ru.practicum.note;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
-public interface ItemNoteService {
+@Transactional(readOnly = true)
+interface ItemNoteService {
+
+    @Transactional
     ItemNoteDto addNewItemNote(long userId, ItemNoteDto itemNoteDto);
 
-    List<ItemNoteDto> searchNotesByUrl(String url, long userId);
+    List<ItemNoteDto> searchNotesByUrl(String url, Long userId);
 
     List<ItemNoteDto> searchNotesByTag(long userId, String tag);
 

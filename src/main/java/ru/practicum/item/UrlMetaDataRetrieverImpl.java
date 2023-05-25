@@ -24,11 +24,23 @@ import java.time.Instant;
 
 @Slf4j
 @Service
-public class UrlMetaDataRetrieverImpl implements UrlMetaDataRetriever {
+class UrlMetaDataRetrieverImpl implements UrlMetaDataRetriever {
     private final HttpClient client;
 
-    public UrlMetaDataRetrieverImpl(@Value("${url-metadata-retriever.read_timeout-sec:120}") int readTimeout) {
-        this.client = HttpClient.newBuilder()
+    // В качестве параметра конструктора, сервис принимает количество секунд в течении которых
+    // он будет ожидать ответа от сервера обрабатывающего url-адрес, переданный в качестве
+    // ссылки для сохранения. Этот параметр Spring получает из файла настроек и автоматически
+    // внедряет в бин. Если в файле настроек таймаут не указан, то по умолчанию он будет равен
+    // 120 секундам.
+    UrlMetaDataRetrieverImpl(@Value("${url-metadata-retriever.read_timeout-sec:120}") int readTimeout) {
+        // Для получения метаданных об URL воспользуемся стандартным HttpClient'ом.
+        // Для этого создадим его экземпляр с нужными нам настройками
+        // Во первых, указываем всегда переходить по новому адресу, если сервер
+        // обрабатывающий URL указывает нам на это. Такая ситуация может возникнуть,
+        // например если пользователь сохраняет сокращенную ссылку (полученную, например
+        // через сервис bitly.com) или по каким-либо другим причинам. Также указываем таймаут
+        // ожидания соединения.
+        this.client =  HttpClient.newBuilder()
                 .followRedirects(HttpClient.Redirect.ALWAYS)
                 .connectTimeout(Duration.ofSeconds(readTimeout))
                 .build();
@@ -88,8 +100,10 @@ public class UrlMetaDataRetrieverImpl implements UrlMetaDataRetriever {
     }
 
     // Вспомогательный метод для соединения с сервером и получения информации о сохраняемом url-адресе
-    private <T> HttpResponse<T> connect(URI url, String method,
+    private <T> HttpResponse<T> connect(URI url,
+                                        String method,
                                         HttpResponse.BodyHandler<T> responseBodyHandler) {
+
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .method(method, HttpRequest.BodyPublishers.noBody())
@@ -107,14 +121,14 @@ public class UrlMetaDataRetrieverImpl implements UrlMetaDataRetriever {
         }
 
         HttpStatus status = HttpStatus.resolve(response.statusCode());
-        if (status == null) {
+        if(status == null) {
             throw new ItemRetrieverException("The server returned an unknown status code: " + response.statusCode());
         }
 
-        if (status.equals(HttpStatus.UNAUTHORIZED) || status.equals(HttpStatus.FORBIDDEN)) {
+        if(status.equals(HttpStatus.UNAUTHORIZED) || status.equals(HttpStatus.FORBIDDEN)) {
             throw new ItemRetrieverException("There is no access to the resource at the specified URL: " + url);
         }
-        if (status.isError()) {
+        if(status.isError()) {
             throw new ItemRetrieverException("Cannot get the data on the item because the server returned an error."
                     + "Response status: " + status);
         }
@@ -122,10 +136,11 @@ public class UrlMetaDataRetrieverImpl implements UrlMetaDataRetriever {
         return response;
     }
 
+    // Вспомогательный метод для получения метаданных о содержимом типа text
+    // и его подтипов, это в том числе html и т.д.
     private UrlMetadataImpl handleText(URI url) {
-        //заполняем поля для случая, когда страница содержит текст (в том числе html)
-        // Отправим get-запрос, чтобы получить содержимое
-        HttpResponse<String> resp = connect(url,"GET",HttpResponse.BodyHandlers.ofString());
+        // Отправим get-запрос чтобы получить содержимое
+        HttpResponse<String> resp = connect(url, "GET", HttpResponse.BodyHandlers.ofString());
 
         // воспользуемся библиотекой Jsoup для парсинга содержимого
         Document doc = Jsoup.parse(resp.body());
@@ -146,7 +161,6 @@ public class UrlMetaDataRetrieverImpl implements UrlMetaDataRetriever {
 
     // Вспомогательный метод для получения метаданных о содержимом типа video
     private UrlMetadataImpl handleVideo(URI url) {
-        //заполняем поля для случая, когда страница содержит видео
         String name = new File(url).getName();
         return UrlMetadataImpl.builder()
                 .title(name)
@@ -156,7 +170,6 @@ public class UrlMetaDataRetrieverImpl implements UrlMetaDataRetriever {
 
     // Вспомогательный метод для получения метаданных о содержимом типа image
     private UrlMetadataImpl handleImage(URI url) {
-        //заполняем поля для случая, когда страница содержит изображение
         String name = new File(url).getName();
         return UrlMetadataImpl.builder()
                 .title(name)

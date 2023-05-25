@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ItemNoteDto {
+
     private Long id;
     private Long itemId;
     private String text;

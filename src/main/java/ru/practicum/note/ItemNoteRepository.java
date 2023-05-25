@@ -7,7 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface ItemNoteRepository extends JpaRepository<ItemNote, Long> {
+interface ItemNoteRepository extends JpaRepository<ItemNote, Long> {
+
     List<ItemNote> findAllByItemUrlContainingAndItemUserId(String itemUrl, Long userId);
 
     @Query("select itNote " +
@@ -17,5 +18,5 @@ public interface ItemNoteRepository extends JpaRepository<ItemNote, Long> {
             "  and ?2 member of i.tags")
     List<ItemNote> findByTag(Long userId, String tag);
 
-    Page<ItemNote> findAllByItemUserId(Long userId, Pageable page);
+    Page<ItemNote> findAllByItemUserId(long userId, Pageable page);
 }

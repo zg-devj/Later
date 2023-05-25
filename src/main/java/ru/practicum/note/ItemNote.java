@@ -1,17 +1,18 @@
 package ru.practicum.note;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import ru.practicum.item.Item;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import ru.practicum.item.model.Item;
 
 import javax.persistence.*;
 import java.time.Instant;
-import java.time.LocalDate;
 
-@Data
 @Entity
-@Table(name = "item_notes", schema = "public")
+@Getter
+@Setter
+@ToString
+@Table(name = "item_notes")
 public class ItemNote {
 
     @Id
@@ -22,6 +23,7 @@ public class ItemNote {
     // исключаем все поля с отложенной загрузкой из
     // метода toString, чтобы не было случайных обращений
     // базе данных, например при выводе в лог.
+    @ToString.Exclude
     private Item item;
 
     private String text;
