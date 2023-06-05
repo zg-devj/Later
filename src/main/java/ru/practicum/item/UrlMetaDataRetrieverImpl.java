@@ -19,6 +19,7 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 
@@ -161,7 +162,7 @@ class UrlMetaDataRetrieverImpl implements UrlMetaDataRetriever {
 
     // Вспомогательный метод для получения метаданных о содержимом типа video
     private UrlMetadataImpl handleVideo(URI url) {
-        String name = new File(url).getName();
+        String name = new File(url.getPath()).getName();
         return UrlMetadataImpl.builder()
                 .title(name)
                 .hasVideo(true)
@@ -170,7 +171,7 @@ class UrlMetaDataRetrieverImpl implements UrlMetaDataRetriever {
 
     // Вспомогательный метод для получения метаданных о содержимом типа image
     private UrlMetadataImpl handleImage(URI url) {
-        String name = new File(url).getName();
+        String name = new File(url.getPath()).getName();
         return UrlMetadataImpl.builder()
                 .title(name)
                 .hasImage(true)
