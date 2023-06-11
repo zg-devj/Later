@@ -1,8 +1,21 @@
 # версия Docker Compose
-version: '3.6'
+version: '3.8'
 
 # имена и описания контейнеров, которые должны быть развёрнуты
 services:
+  # описание контейнера db
+  db:
+    # образ, из которого должен быть запущен контейнер
+    image: postgres:13.7-alpine
+    # volume и связанная с ним директория в контейнере
+    volumes:
+      - pgdatadb:/var/lib/postgresql/data
+    # переменные окружения
+    environment:
+      - POSTGRES_DB=later
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+
   web:
     build: .
     ports:
@@ -18,15 +31,6 @@ services:
       - DB_HOST=db
       - DB_PORT=5432
 
-  # описание контейнера db
-  db:
-    # образ, из которого должен быть запущен контейнер
-    image: postgres:13.7-alpine
-    # volume и связанная с ним директория в контейнере
-    volumes:
-      - /var/lib/postgresql/data/
-    # переменные окружения
-    environment:
-      - POSTGRES_DB=later
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=root
+volumes:
+  pgdatadb:
+    driver: local
