@@ -32,18 +32,6 @@ public class PersistenceConfig {
         properties.put("hibernate.show_sql", environment.getProperty("hibernate.show_sql", "false"));
         properties.put("javax.persistence.schema-generation.database.action",
                 environment.getProperty("javax.persistence.schema-generation.database.action", "none"));
-
-
-        properties.put("hibernate.hbm2ddl.import_files_sql_extractor",
-                environment.getProperty("hibernate.hbm2ddl.import_files_sql_extractor"));
-
-//        properties.put("javax.persistence.schema-generation.drop-source",
-//                environment.getProperty("javax.persistence.schema-generation.drop-source", "script"));
-//
-//        properties.put("javax.persistence.schema-generation.drop-script-source",
-//                environment.getProperty("javax.persistence.schema-generation.drop-script-source", "drop.sql"));
-
-
         properties.put("javax.persistence.schema-generation.create-script-source",
                 environment.getProperty("javax.persistence.schema-generation.create-script-source"));
         return properties;
