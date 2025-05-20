@@ -1,85 +1,49 @@
 package ru.practicum.user;
 
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-import javax.transaction.Transactional;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
-@Transactional
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
-@SpringBootTest
-class UserServiceImplTest {
+@ExtendWith(MockitoExtension.class)
+public class UserServiceImplTest {
+    @InjectMocks
+    private UserServiceImpl userService;
 
-//    private final EntityManager em;
-//    private final UserService userService;
-//
-////    @Test
-////    void saveUser() {
-////        // given
-////        UserDto userDto = makeUserDto("some@email.com", "Пётр", "Иванов");
-////
-////        // when
-////        userService.saveUser(userDto);
-////
-////        // then
-////        TypedQuery<User> query = em.createQuery("Select u from User u where u.email = :email", User.class);
-////        User user = query.setParameter("email", userDto.getEmail())
-////                .getSingleResult();
-////
-////        assertThat(user.getId(), notNullValue());
-////        assertThat(user.getFirstName(), equalTo(userDto.getFirstName()));
-////        assertThat(user.getLastName(), equalTo(userDto.getLastName()));
-////        assertThat(user.getEmail(), equalTo(userDto.getEmail()));
-////        assertThat(user.getState(), equalTo(userDto.getState()));
-////        assertThat(user.getRegistrationDate(), notNullValue());
-////    }
-//
-//    @Test
-//    void getAllUsers() {
-//        // given
-//        List<UserDto> sourceUsers = List.of(
-//                makeUserDto("ivan@email", "Ivan", "Ivanov"),
-//                makeUserDto("petr@email", "Petr", "Petrov"),
-//                makeUserDto("vasilii@email", "Vasilii", "Vasiliev")
-//        );
-//
-//        for (UserDto user : sourceUsers) {
-//            User entity = UserMapper.mapToNewUser(user);
-//            em.persist(entity);
-//        }
-//
-//        // when
-//        List<UserDto> targetUsers = userService.getAllUsers();
-//
-//        // then
-//        assertThat(targetUsers, hasSize(sourceUsers.size()));
-////        for (UserDto sourceUser : sourceUsers) {
-////            assertThat(targetUsers, hasItem(allOf(
-////                    hasProperty("id", notNullValue()),
-////                    hasProperty("firstName", equalTo(sourceUser.getFirstName())),
-////                    hasProperty("lastName", equalTo(sourceUser.getLastName())),
-////                    hasProperty("email", equalTo(sourceUser.getEmail()))
-////            )));
-////        }
-//    }
-//
-//    private UserDto makeUserDto(String email, String firstName, String lastName) {
-//        UserDto dto = new UserDto();
-//        dto.setEmail(email);
-//        dto.setFirstName(firstName);
-//        dto.setLastName(lastName);
-//        dto.setState(UserState.ACTIVE);
-//
-//        return dto;
-//    }
+    @Mock
+    private UserRepository userRepository;
+
+    @Test
+    public void getAllUsers() {
+        // given
+        final UserDto userDto = makeUserDto("some@email.com", "Пётр", "Иванов");
+
+        when(userRepository.findAll()).thenReturn(List.of(UserMapper.mapToNewUser(userDto)));
+
+        final List<UserDto> result = userService.getAllUsers();
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getEmail()).isEqualTo(userDto.getEmail());
+        assertThat(result.get(0).getFirstName()).isEqualTo(userDto.getFirstName());
+        assertThat(result.get(0).getLastName()).isEqualTo(userDto.getLastName());
+        assertThat(result.get(0).getRegistrationDate()).isNotNull();
+
+        verify(userRepository,times(1)).findAll();
+    }
+
+    private UserDto makeUserDto(String email, String firstName, String lastName) {
+        UserDto dto = new UserDto();
+        dto.setEmail(email);
+        dto.setFirstName(firstName);
+        dto.setLastName(lastName);
+        dto.setState(UserState.ACTIVE);
+
+        return dto;
+    }
 }
