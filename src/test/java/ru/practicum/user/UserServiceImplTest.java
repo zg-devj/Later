@@ -35,6 +35,7 @@ public class UserServiceImplTest {
         assertThat(result.get(0).getRegistrationDate()).isNotNull();
 
         verify(userRepository,times(1)).findAll();
+        verifyNoMoreInteractions(userRepository);
     }
 
     private UserDto makeUserDto(String email, String firstName, String lastName) {
